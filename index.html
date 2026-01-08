@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AR(1) Process Simulation Page</title>
+    <style>
+        body { font-family: sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; line-height: 1.6; }
+        img { max-width: 100%; height: auto; border: 1px solid #ddd; }
+        code { background: #f4f4f4; padding: 2px 5px; border-radius: 3px; }
+        .result-box { background: #eef; padding: 15px; border-radius: 5px; margin-top: 20px; }
+    </style>
+</head>
+<body>
+    <h1>AR(1) Process Simulation (例題)</h1>
+    <p>This page demonstrates the AutoRegressive (AR) Model simulation based on the provided conversation example.</p>
+
+    <h2>Model Definition</h2>
+    <p>The AR(1) process is defined as:</p>
+    <p><code>y<sub>t</sub> = 0.5 * y<sub>t-1</sub> + &epsilon;<sub>t</sub></code></p>
+
+    <h2>Simulation Results</h2>
+    <p>The following plot shows a single realization of the process (left) and the Autocorrelation Function (ACF) (right). The red dashed line in the ACF plot represents the theoretical decay (<code>0.5<sup>k</sup></code>).</p>
+
+    <img src="ar_plot.png" alt="AR(1) Process Simulation and ACF Plot">
+
+    <div class="result-box">
+        <h3>Variance Verification</h3>
+        <p>The simulation verifies that the variance of the sample mean in an AR(1) process (with positive correlation) is significantly larger than that of an IID process.</p>
+        <ul>
+            <li><strong>Theoretical Ratio (AR/IID):</strong> ~3.0 (for T=100, &alpha;=0.5)</li>
+            <li><strong>Empirical Result:</strong> See console output or notebook.</li>
+        </ul>
+    </div>
+
+    <p><a href="ar_example.ipynb">Download the Jupyter Notebook</a></p>
+</body>
+</html>
