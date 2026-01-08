@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>検定と精度（分散/標準偏差）のつながり</title>
+    <style>
+        body { font-family: sans-serif; max-width: 900px; margin: 0 auto; padding: 20px; line-height: 1.7; }
+        code { background: #f4f4f4; padding: 2px 5px; border-radius: 3px; }
+        pre { background: #f4f4f4; padding: 12px; border-radius: 6px; overflow-x: auto; }
+        h1, h2 { border-bottom: 1px solid #ddd; padding-bottom: 6px; }
+        .note { background: #eef7ff; padding: 12px; border-radius: 6px; }
+    </style>
+</head>
+<body>
+    <h1>検定と精度（分散/標準偏差）のつながり</h1>
+    <p>統計で「精度」を<strong>分散（または標準偏差）</strong>で測るのは常套手段です。ここでは<strong>推定量の精度比較</strong>と<strong>検定統計量の標準化</strong>を一本化して説明します。</p>
+
+    <h2>1) 「精度」= 推定量の散らばり（MSE）</h2>
+    <p>推定量 <code>θ̂</code> の良さは基本的に</p>
+    <pre> MSE(θ̂) = E[(θ̂-θ)^2]
+        = Var(θ̂) + Bias(θ̂)^2</pre>
+    <ul>
+        <li>不偏なら Bias=0 → <strong>MSE = Var</strong></li>
+        <li>不偏推定量同士なら <strong>分散が小さい方が精度が高い</strong></li>
+    </ul>
+    <p>問14はまさにこれで、<code>ȳ</code> と <code>x̄</code> は不偏だから<strong>精度比較＝分散比較</strong>です。</p>
+
+    <h2>2) 「割る分散/標準偏差」の意味は “標準化”</h2>
+    <p>検定でも推定でも、よく</p>
+    <pre> (θ̂-θ) / SE(θ̂)   (SE = √Var)</pre>
+    <p>のように<strong>標準誤差で割る</strong>のは、次の意味づけです。</p>
+    <ul>
+        <li>分子：ズレ（信号）</li>
+        <li>分母：そのズレがどれくらい普通に出るか（ノイズの尺度）</li>
+    </ul>
+    <p>→ 「何σズレたか」に変換し、比較可能にする。</p>
+    <p>問14では検定統計量を作っていないだけで、やってることは同じです。<code>Var(x̄)</code> と <code>Var(ȳ)</code> を比べて「どっちがブレないか」を見ています。</p>
+
+    <h2>3) プーリング推定（2標本比率）で出てくる “D/Var(D)” の接続</h2>
+    <p>記憶にある</p>
+    <ul>
+        <li><code>D</code>（差）を作る</li>
+        <li><code>D / Var(D)</code> や <code>D / √Var(D)</code> で標準化</li>
+        <li>分母の <code>Var(D)</code> に <code>p̂</code>（プール）を入れる</li>
+    </ul>
+    <p>これは<strong>帰無仮説の下での分散を推定している</strong>だけです。</p>
+    <p>典型：2標本比率の差</p>
+    <pre> D = p̂1 - p̂2</pre>
+    <p>帰無 <code>H0: p1 = p2 = p</code> の下では</p>
+    <pre> Var(D) = p(1-p) (1/n1 + 1/n2)</pre>
+    <p>でも <code>p</code> は未知なので、帰無に沿った<strong>プール推定量</strong></p>
+    <pre> p̂ = (x1 + x2) / (n1 + n2)</pre>
+    <p>を分母に入れて</p>
+    <pre> Z = D / √( p̂(1-p̂) (1/n1 + 1/n2) )</pre>
+    <div class="note">
+        <p><strong>ここでやってる核</strong></p>
+        <ul>
+            <li>“差” <code>D</code> の大きさを</li>
+            <li>“その差がどれくらい揺れるか” <code>√Var(D)</code> で割って</li>
+            <li>無次元の尺度（Z）にする</li>
+        </ul>
+    </div>
+
+    <h2>4) 問14への完全対応（同じ型）</h2>
+    <p>問14で比較してるのは推定量がどれだけ揺れるか：</p>
+    <pre> iid平均: Var(x̄) = σu^2 / 10
+ AR(1)平均: Var(ȳ10) = (1/10^2) ΣΣ Cov(yi, yj)</pre>
+    <p>もし問14を“検定っぽく”書けば、</p>
+    <pre> (ȳT - μ) / √Var(ȳT)</pre>
+    <p>という<strong>同じ標準化</strong>が出てきます。違いは、プーリング問題では分散が未知だから <code>p̂</code> 等で推定していただけです。</p>
+
+    <h2>5) 1行で統一すると</h2>
+    <ul>
+        <li><strong>推定</strong>：精度 = <code>Var(θ̂)</code>（不偏なら MSE=Var）</li>
+        <li><strong>検定</strong>：<code>(θ̂-θ0)/√Var(θ̂)</code> にして「何σ」を見る</li>
+        <li><strong>プーリング</strong>：<code>Var</code> 中の未知母数を帰無仮説に沿って推定して差し込む</li>
+    </ul>
+
+    <p>必要なら、問14をそのまま「μの検定（Z検定）」に変形して、分母に<strong>相関込みの Var(ȳT)</strong>が入るのを見せられます（プーリングの分母と完全に同型）。</p>
+</body>
+</html>
