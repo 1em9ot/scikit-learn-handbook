@@ -9,7 +9,8 @@
 - 第6章：次元削減   
 - 第7章：モデルの評価    
 - 第8章：Preprocessing、実データ分析
-- 第9章：scikit-learn API
+- 第9章：2値ラベルの確率整理
+- 第10章：scikit-learn API
 
 ## 正誤表
 | ページ | 誤 | 正 | 補足 |
