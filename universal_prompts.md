@@ -170,3 +170,128 @@ F) 次の周回の指示（演習を速く回すため）
 - 「次に同型を2問解くなら、E差し替えはここ／係数はここ」など最短の注意点を2行
 - もし詰まりが出るなら、どの式のどの行を再質問すべきか（ピンポイント質問文）を1個出す
 ```
+
+---
+
+## (D) 事例辞典の台帳運用（Stage1/Stage2の機械化）
+
+この節は、**「問＋答セット」を機械的に整理して Part IV（事例辞典）へ流し込む**ための運用手順です。  
+目的は「他チャットに溜まった問題群を、検索→台帳化→ページ化の流れでさばく」ことに特化させること。
+
+### 1) Stage1（台帳）を作る：最小4行テンプレ
+
+問＋答が揃っている話題は、以下の4行だけで索引化できます。  
+※余計な解説は不要。**答の最終形と記号辞書だけ**を書けばOK。
+
+```text
+[Title] ・・・（短い名前）
+[Q]     ・・・（何を出す？ P( ) / Var( ) / 事後 / 検定量 など）
+[A]     ・・・（最終式の形。例：1-Φ((c-μ)/σ)）
+[Given] ・・・（記号辞書：p,t,f / n,N / μ,σ など）
+```
+
+必要なときだけ、仮定を1語で追加：
+
+```text
+[Assume] indep / dep / markov / mix / normal / linear
+```
+
+### 2) 台帳ファイル（iv_manifest.tsv）形式
+
+Stage1で集めた要素を「1行=1問題」で保存する。  
+**タブ区切りTSV**が運用しやすい（追記が速い）。
+
+```tsv
+id	title	dom	obj	shape	etype	dec	dep	tool	src	q	a	given	assume
+IV-A-001	単発陽性→感染事後	dom/prob	obj/post	shape/latent_obs	single	sum_partition	indep	update_q	感染症Q1	"P(H|E)"	"(t p)/(t p+f p̄)"	"p,t,f"	"indep"
+```
+
+#### 主要列の意味（最小限）
+
+- `dom`：分野（prob/stat/ts/ml/la など）
+- `obj`：出力（post/prob/var/cov/test/est/cls/compare）
+- `shape`：型（latent_obs / sampling / standardize / sequence / estimation / hypothesis / geometry）
+- `etype`：Eの形（single / intersection / threshold / count_k / sequence / none）
+- `dec`：分解（sum_partition / prod_step / both / none）
+- `dep`：依存性（indep / dep / markov / mix / none）
+- `tool`：道具（update_q / cov_expand / zscore / likelihood / chi_square など）
+
+### 3) Stage2（ページ雛形）の自動生成
+
+台帳から、**Part IV の雛形ページを自動生成**する。  
+ここでは「本文の埋め込み」は後回しで良い。
+
+#### 出力の固定フォーム（1ページ分）
+
+```text
+# Title
+
+## Tags
+- dom/...
+- obj/...
+- shape/...
+- etype/...
+- dec/...
+- dep/...
+- tool/...
+
+## Spec
+（Ω, H, O_i, T を最小宣言）
+
+## Query
+問：...
+求：...
+
+## E（事象）
+E := ...（intersection/sequence は左=新、右=旧）
+
+## Given
+記号辞書（Given）＋仮定（Assume）
+
+## Decompose
+Σ / ∏ / 両方の宣言
+
+## Compute
+最終式（台帳のAを写経）
+
+## Check
+1行検算（極限/範囲/単位）
+```
+
+### 4) 判別ルール（問＋答から dom/obj/shape を決める）
+
+**答の形だけでほぼ決まる**ので、機械化しやすい。
+
+- 分数 `A/(A+B)` → obj/post（事後）  
+- `1-Φ(…)` → obj/prob + shape/standardize  
+- `Var(Σ)=ΣVar+2ΣCov` → obj/var + shape/sampling + tool/cov_expand  
+- `χ², p値, df` → obj/test + shape/hypothesis  
+- `argmax, logL, score` → obj/est + shape/estimation  
+- `距離, 境界, sign` → obj/compare/cls + shape/geometry  
+
+### 5) チャット検索で拾う運用（機械化の流れ）
+
+1. **検索で「問＋答が揃ってる」話題だけ拾う**  
+2. Stage1テンプレで4行化  
+3. `iv_manifest.tsv` に追記  
+4. 不足（TBD）は lint で炙る  
+5. 追記 → 雛形生成 → まとめて埋める  
+
+> 重要：台帳が「真実の源」になる。本文生成は必ず台帳から作る。
+
+### 6) TBD回収用プロンプト（コピペ用）
+
+「該当チャットに戻って最終式だけ拾う」ための最短テンプレ：
+
+```text
+【目的】iv_manifest.tsv のTBD行を埋めるため、最終式aと記号辞書givenだけ回収する。
+【制約】余計な解説は禁止。式と定義だけ。
+【記号憲法】Ω、H、O_i、E、q。逐次は E_{1:i}:=E_i∩…∩E_1（左=新、右=旧）。p̄=1-p。
+【出力】次の4行だけ：
+q: ...
+a: ...
+given: ...
+assume: ...
+```
+
+---
