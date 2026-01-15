@@ -2,6 +2,36 @@
 
 以下は講義内容を可読な形に整理し、**数式が抜けていた箇所や途中計算が省略されていた箇所をすべて補完**したノート版です。
 
+## 0. 全体像（体系化のための編綴）
+
+### 0.1 学習の流れ（粒度別）
+
+1. **モデルの定義**：AR/MA/ARMA/ARIMA/SARIMAの形を押さえる  
+2. **特性と安定性**：自己共分散・パワースペクトル・定常性  
+3. **推定の枠組み**：Yule-Walker、PARCOR、インパルス応答  
+4. **拡張**：多変量（VAR）・フィードバック系・周波数領域  
+
+### 0.2 章内マップ（どの式がどこに効くか）
+
+| 目的 | 使う式/概念 | 関連セクション |
+| --- | --- | --- |
+| 定常性の判定 | 特性方程式と単位円 | 1.11 |
+| 予測や構造理解 | インパルス応答 | 1.7 |
+| 推定の入口 | Yule-Walker | 1.8 |
+| 周波数視点 | パワースペクトル | 1.2, 1.10 |
+| 多変量拡張 | VAR, クロススペクトル | 2.1〜2.4 |
+| 相互作用 | 2変量フィードバック | 3.1〜3.4 |
+
+### 0.3 モデル構造の見取り図（ARMA）
+
+```mermaid
+flowchart LR
+  Y["y_n"] -->|AR: 過去のy| Ypast["y_{n-1..m}"]
+  V["v_n"] -->|MA: 過去のv| Vpast["v_{n-1..ℓ}"]
+  Ypast --> Y
+  Vpast --> Y
+```
+
 ## 1. 1変量ARMAモデル
 
 ### 1.1 時系列モデルの基本形
@@ -30,6 +60,8 @@
 \]
 
 とフラットになる。
+
+![白色雑音のパワースペクトル](figures/white_noise_psd.svg)
 
 ### 1.3 ARMAモデルの定義
 
@@ -155,6 +187,8 @@ $k>0$ では $\mathbb{E}[v_n y_{n-k}]=0$、$k=0$ では $\mathbb{E}[v_n y_n]=\si
 
 これがYule-Walker方程式。
 
+![AR(1)の自己共分散の減衰イメージ](figures/ar1_acf_decay.svg)
+
 ### 1.9 偏自己相関（PARCOR）
 
 AR$(m)$モデルの $j$ 番目係数を $a_j^{(m)}$ とすると、偏自己相関係数は
@@ -192,6 +226,30 @@ ARオペレータの特性方程式：
 \]
 
 根が**単位円の外側**にあれば定常。
+
+![定常性の判定（単位円の外側）](figures/unit_circle_poles.svg)
+
+<details>
+<summary>簡易インタラクティブ：AR(1)の定常性チェック</summary>
+<div>
+  <label for="a1Range">a1（-1.5〜1.5）</label>
+  <input id="a1Range" type="range" min="-1.5" max="1.5" step="0.1" value="0.6">
+  <output id="a1Value">0.6</output>
+  <p id="stationarityMsg">判定: |a1| &lt; 1 なので定常</p>
+</div>
+<script>
+  const range = document.getElementById('a1Range');
+  const value = document.getElementById('a1Value');
+  const msg = document.getElementById('stationarityMsg');
+  const update = () => {
+    const a1 = parseFloat(range.value);
+    value.textContent = a1.toFixed(1);
+    msg.textContent = Math.abs(a1) < 1 ? '判定: |a1| < 1 なので定常' : '判定: |a1| ≥ 1 なので非定常';
+  };
+  range.addEventListener('input', update);
+  update();
+</script>
+</details>
 
 #### 途中計算（m=1）
 
@@ -367,3 +425,11 @@ ARMA(2,2)の例：
 \]
 
 （上式をRコードに対応させると $a=(0.9\sqrt{3},-0.81),\ b=(0.9\sqrt{2},-0.81)$。）
+
+### 4.1 係数の見取り表（数式のみの箇所を視覚補助）
+
+| モデル | 係数ベクトル（AR） | 係数ベクトル（MA） | 視点 |
+| --- | --- | --- | --- |
+| AR(2) | $(0.9\\sqrt{3}, -0.81)$ | なし | 極の位置で定常性を見る |
+| MA(2) | なし | $(0.9\\sqrt{2}, -0.81)$ | 雑音の形状が決まる |
+| ARMA(2,2) | $(0.9\\sqrt{3}, -0.81)$ | $(0.9\\sqrt{2}, -0.81)$ | 両方を統合して解釈 |
